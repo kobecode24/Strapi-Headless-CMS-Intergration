@@ -1,0 +1,193 @@
+# Strapi API Collection
+
+###
+@baseUrl =http://localhost:1337/api
+# group: Articles
+# @name Get All Articles
+# Retrieves a list of all articles with populated relations
+GET {{baseUrl}}/articles?
+    populate=*&
+    sort=createdAt:desc&
+    pagination[limit]=10
+
+###
+@articleNumericId =7
+# group: Articles
+# @name Get Article by Numeric ID
+# Retrieves a specific article by its numeric ID (e.g. ID 7: 'This shrimp is awesome')
+GET {{baseUrl}}/articles/{{articleNumericId}}?
+    populate=*
+
+###
+@categoryNumericId =1
+# group: Articles
+# @name Create Article
+# Creates a new article
+POST {{baseUrl}}/articles
+Content-Type: application/json
+
+{
+  "data": {
+    "title": "Sample Article",
+    "description": "This is a sample article description",
+    "slug": "sample-article",
+    "category": {{categoryNumericId}}
+  }
+}
+
+###
+# group: Articles
+# @name Update Article by Numeric ID
+# Updates an article using its numeric ID (e.g. ID 7: 'This shrimp is awesome')
+PUT {{baseUrl}}/articles/{{articleNumericId}}
+Content-Type: application/json
+
+{
+  "data": {
+    "title": "Updated Article Title",
+    "description": "Updated description for This shrimp is awesome",
+    "category": 2
+  }
+}
+
+###
+@articleDocumentId =ghk61t6e6fxdxqi6l03zokyw
+# group: Articles
+# @name Update Article by DocumentID
+# Updates an article using its documentId (e.g. 'ghk61t6e6fxdxqi6l03zokyw' for 'This shrimp is awesome')
+PUT {{baseUrl}}/articles/document/{{articleDocumentId}}
+Content-Type: application/json
+
+{
+  "data": {
+    "title": "Updated Shrimp Article",
+    "description": "Mantis shrimps are truly amazing creatures",
+    "category": 3
+  }
+}
+
+###
+# group: Articles
+# @name Delete Article by DocumentID
+# Deletes an article by documentId
+DELETE {{baseUrl}}/articles/{{articleDocumentId}}
+
+###
+# group: Articles
+# @name Get Related Articles
+# Get articles related to the specified article (same category)
+GET {{baseUrl}}/articles/{{articleNumericId}}/related
+
+###
+# group: Articles
+# @name Debug Articles
+# Retrieves debugging information about all articles in the database
+GET {{baseUrl}}/articles-debug
+
+###
+# group: Categories
+# @name Get All Categories
+# Retrieves a list of all categories
+GET {{baseUrl}}/categories
+
+###
+# group: Categories
+# @name Get Category by ID
+# Retrieves a specific category (e.g. ID 1: 'news')
+GET {{baseUrl}}/categories/{{categoryNumericId}}
+
+###
+# group: Categories
+# @name Create Category
+# Creates a new category
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "data": {
+    "name": "Testing Category",
+    "slug": "testing-category"
+  }
+}
+
+###
+# group: Categories
+# @name Update Category
+# Updates a category (e.g. ID 1: 'news')
+PUT {{baseUrl}}/categories/{{categoryNumericId}}
+Content-Type: application/json
+
+{
+  "data": {
+    "name": "Updated News Category",
+    "description": "Latest news articles"
+  }
+}
+
+###
+# group: Categories
+# @name Delete Category
+# Deletes a category (e.g. ID 6: 'New Category')
+DELETE {{baseUrl}}/categories/6
+
+###
+# group: Media
+# @name Upload File
+# Uploads a file to the server
+POST http://localhost:1337/api/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="files"; filename="file.jpg"
+
+< /path/to/your/file.jpg
+--WebAppBoundary
+
+###
+# group: Real Data Examples
+# @name Get Shrimp Article
+# Gets the 'This shrimp is awesome' article by ID 7
+GET {{baseUrl}}/articles/7?
+    populate=*
+
+###
+# group: Real Data Examples
+# @name Update Existing Article
+# Updates the 'In quibusdam debitis' article by documentId
+PUT {{baseUrl}}/articles/document/uxk560at3jsww844740rhzzq
+Content-Type: application/json
+
+{
+  "data": {
+    "title": "Updated Article Title",
+    "description": "This article has been updated via API",
+    "category": 2
+  }
+}
+
+###
+@coverImageId =6
+# group: Real Data Examples
+# @name Create Article with Cover
+# Creates an article with a cover image using an existing image ID (6)
+POST {{baseUrl}}/articles
+Content-Type: application/json
+
+{
+  "data": {
+    "title": "New Article with Cover Image",
+    "description": "This article has a cover image from an existing upload",
+    "slug": "new-article-with-cover",
+    "cover": {
+      "id": {{coverImageId}}
+    },
+    "category": 4
+  }
+}
+
+###
+# group: Real Data Examples
+# @name Get Black Hole Article
+# Gets the 'What's inside a Black Hole' article by ID 8
+GET {{baseUrl}}/articles/8?
+    populate=*

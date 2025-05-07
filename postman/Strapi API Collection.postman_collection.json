@@ -1,0 +1,546 @@
+{
+	"info": {
+		"_postman_id": "3ec6342b-f606-4b5d-9358-528142b270d5",
+		"name": "Strapi API Collection",
+		"description": "Collection for testing Strapi API endpoints with dynamic sample data",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33671347"
+	},
+	"item": [
+		{
+			"name": "Articles",
+			"item": [
+				{
+					"name": "Get All Articles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/articles?populate=*",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles"
+							],
+							"query": [
+								{
+									"key": "populate",
+									"value": "*"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt:desc",
+									"disabled": true
+								},
+								{
+									"key": "pagination[limit]",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Retrieves a list of all articles with populated relations"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Article by Numeric ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/articles/{{articleNumericId}}?populate=*",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles",
+								"{{articleNumericId}}"
+							],
+							"query": [
+								{
+									"key": "populate",
+									"value": "*"
+								}
+							]
+						},
+						"description": "Retrieves a specific article by its numeric ID (e.g. ID 7: 'This shrimp is awesome')"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Article",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": {\n    \"title\": \"Sample Article\",\n    \"description\": \"This is a sample article description\",\n    \"slug\": \"sample-article\",\n    \"category\": {{categoryNumericId}}\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/articles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles"
+							]
+						},
+						"description": "Creates a new article"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Article by Numeric ID",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": {\n    \"title\": \"Updated Article Title\",\n    \"description\": \"Updated description for This shrimp is awesome\",\n    \"category\": 2\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/articles/{{articleNumericId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles",
+								"{{articleNumericId}}"
+							]
+						},
+						"description": "Updates an article using its numeric ID (e.g. ID 7: 'This shrimp is awesome')"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Article by DocumentID",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": {\n    \"title\": \"Updated Shrimp Article\",\n    \"description\": \"Mantis shrimps are truly amazing creatures\",\n    \"category\": 3\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/articles/document/{{articleDocumentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles",
+								"document",
+								"{{articleDocumentId}}"
+							]
+						},
+						"description": "Updates an article using its documentId (e.g. 'ghk61t6e6fxdxqi6l03zokyw' for 'This shrimp is awesome')"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Article by DocumentID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/articles/{{articleDocumentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles",
+								"{{articleDocumentId}}"
+							]
+						},
+						"description": "Deletes an article by documentId"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Related Articles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/articles/{{articleNumericId}}/related",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles",
+								"{{articleNumericId}}",
+								"related"
+							]
+						},
+						"description": "Get articles related to the specified article (same category)"
+					},
+					"response": []
+				},
+				{
+					"name": "Debug Articles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/articles-debug",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles-debug"
+							]
+						},
+						"description": "Retrieves debugging information about all articles in the database"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Retrieves a list of all categories"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/categories/{{categoryNumericId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories",
+								"{{categoryNumericId}}"
+							]
+						},
+						"description": "Retrieves a specific category (e.g. ID 1: 'news')"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": {\n    \"name\": \"Testing Category\",\n    \"slug\": \"testing-category\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Creates a new category"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": {\n    \"name\": \"Updated News Category\",\n    \"description\": \"Latest news articles\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/categories/{{categoryNumericId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories",
+								"{{categoryNumericId}}"
+							]
+						},
+						"description": "Updates a category (e.g. ID 1: 'news')"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/categories/6",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories",
+								"6"
+							]
+						},
+						"description": "Deletes a category (e.g. ID 6: 'New Category')"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Media",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"type": "file",
+									"src": "/path/to/your/file.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:1337/api/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1337",
+							"path": [
+								"api",
+								"upload"
+							]
+						},
+						"description": "Uploads a file to the server"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Real Data Examples",
+			"item": [
+				{
+					"name": "Get Shrimp Article",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/articles/7?populate=*",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles",
+								"7"
+							],
+							"query": [
+								{
+									"key": "populate",
+									"value": "*"
+								}
+							]
+						},
+						"description": "Gets the 'This shrimp is awesome' article by ID 7"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Existing Article",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": {\n    \"title\": \"Updated Article Title\",\n    \"description\": \"This article has been updated via API\",\n    \"category\": 2\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/articles/document/uxk560at3jsww844740rhzzq",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles",
+								"document",
+								"uxk560at3jsww844740rhzzq"
+							]
+						},
+						"description": "Updates the 'In quibusdam debitis' article by documentId"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Article with Cover",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": {\n    \"title\": \"New Article with Cover Image\",\n    \"description\": \"This article has a cover image from an existing upload\",\n    \"slug\": \"new-article-with-cover\",\n    \"cover\": {\n      \"id\": {{coverImageId}}\n    },\n    \"category\": 4\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/articles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles"
+							]
+						},
+						"description": "Creates an article with a cover image using an existing image ID (6)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Black Hole Article",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/articles/8?populate=*",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"articles",
+								"8"
+							],
+							"query": [
+								{
+									"key": "populate",
+									"value": "*"
+								}
+							]
+						},
+						"description": "Gets the 'What's inside a Black Hole' article by ID 8"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:1337/api",
+			"type": "string"
+		},
+		{
+			"key": "articleNumericId",
+			"value": "7",
+			"type": "string"
+		},
+		{
+			"key": "articleDocumentId",
+			"value": "ghk61t6e6fxdxqi6l03zokyw",
+			"type": "string"
+		},
+		{
+			"key": "categoryNumericId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "categoryDocumentId",
+			"value": "tx39xif57193ahqwo2c4a7ib",
+			"type": "string"
+		},
+		{
+			"key": "coverImageId",
+			"value": "6",
+			"type": "string"
+		}
+	]
+}
