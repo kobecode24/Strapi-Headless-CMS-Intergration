@@ -42,7 +42,7 @@ const Block: React.FC<{ block: ContentBlock }> = ({ block }) => {
             );
 
         default:
-            return <div>Unknown block type: {(block as any).__component}</div>;
+            return <div>Unknown block type: {block.__component}</div>;
     }
 };
 

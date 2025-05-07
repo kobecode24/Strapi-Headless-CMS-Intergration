@@ -13,7 +13,9 @@ export const handleApiError = (error: unknown): ApiError => {
         const axiosError = error as AxiosError;
 
         // Handle Strapi-specific error format
-        if (axiosError.response?.data && 'error' in axiosError.response.data) {
+        if (axiosError.response?.data &&
+            typeof axiosError.response.data === 'object' &&
+            'error' in axiosError.response.data) {
             const strapiError = axiosError.response.data.error as {
                 status: number;
                 name: string;

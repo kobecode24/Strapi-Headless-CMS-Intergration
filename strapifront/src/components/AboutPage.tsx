@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { StrapiSingleResponse } from '../types';
-
-interface About {
-    title: string;
-    content: string;
-}
-
 const AboutPage: React.FC = () => {
-    const [aboutData, setAboutData] = useState<any>(null);
+    interface AboutData {
+        data?: {
+            attributes?: {
+                title?: string;
+                content?: string;
+            };
+            title?: string;
+            content?: string;
+        };
+    }
+
+    const [aboutData, setAboutData] = useState<AboutData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 

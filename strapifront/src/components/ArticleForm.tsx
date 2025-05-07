@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArticleService } from '../services/api';
+import axios from "axios";
 
 interface ArticleFormProps {
     mode: 'create' | 'edit';
@@ -20,6 +21,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ mode }) => {
     const [coverImage, setCoverImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [documentId, setDocumentId] = useState<string | null>(null);
 
     // If editing, fetch the existing article data
     useEffect(() => {
@@ -27,13 +29,23 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ mode }) => {
             const fetchArticle = async () => {
                 try {
                     setLoading(true);
-                    const response = await ArticleService.getById(id);
+                    // Ensure numeric ID if possible
+                    const numericId = !isNaN(Number(id)) ? Number(id) : id;
+                    const response = await ArticleService.getById(numericId.toString());
                     
                     if (!response || !response.data) {
                         throw new Error(`Article with ID ${id} not found`);
                     }
                     
                     const article = response.data.attributes || response.data;
+                    // Remember documentId for later use in updates
+                    const docId = response.data.attributes?.documentId || response.data.documentId;
+                    if (docId) {
+                        setDocumentId(docId);
+                        console.log("Found documentId:", docId);
+                    } else {
+                        console.log("No documentId found in response");
+                    }
                     
                     setFormData({
                         title: article.title || '',
@@ -50,12 +62,14 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ mode }) => {
                     }
                     
                     setLoading(false);
-                } catch (err: any) {
+                } catch (err: unknown) {
                     console.error("Error fetching article:", err);
-                    const errorMessage = err.response?.data?.error?.message || err.message || 'Article not found';
+                    const errorMessage = axios.isAxiosError(err)
+                        ? err.response?.data?.error?.message || err.message
+                        : err instanceof Error ? err.message : 'Article not found';
                     setError(errorMessage);
                     setLoading(false);
-                    
+
                     // Redirect back to articles list after 3 seconds
                     setTimeout(() => {
                         navigate('/articles');
@@ -127,8 +141,16 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ mode }) => {
                 }
             }
             
-            // Prepare article data
-            const articleData: any = {
+            // Prepare article data for create/update
+            const articleData: {
+                title: string;
+                description: string;
+                slug: string;
+                cover?: {
+                    id: number;
+                };
+                category?: number | undefined;
+            } = {
                 title: formData.title,
                 description: formData.description,
                 slug: slug
@@ -136,24 +158,68 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ mode }) => {
             
             // Only include cover if we have a new image to upload
             if (coverImageId) {
-                articleData.cover = coverImageId;
+                articleData.cover = { id: coverImageId };
             }
             
-            // Only include category if one is selected
-            if (formData.category) {
-                articleData.category = { connect: [parseInt(formData.category)] };
+            // Handle category field - the backend handles the correct format via our custom controller
+            if (formData.category && formData.category.trim() !== '') {
+                const categoryId = parseInt(formData.category);
+                if (!isNaN(categoryId)) {
+                    // For both create and update, send the categoryId as a number
+                    // Our custom controller will handle the proper format
+                    articleData.category = categoryId;
+                }
+            } else {
+                // If a category is empty, don't include it (undefined)
+                delete articleData.category;
             }
+            
+            console.log(`${mode === 'create' ? 'Creating' : 'Updating'} article with data:`, articleData);
 
             if (mode === 'create') {
                 await ArticleService.create(articleData);
                 navigate('/articles');
             } else if (mode === 'edit' && id) {
-                await ArticleService.update(id, articleData);
-                navigate(`/articles/${id}`);
+                // Prefer using documentId if available
+                if (documentId) {
+                    console.log(`Using documentId for update: ${documentId}`);
+                    try {
+                        const result = await ArticleService.update(documentId, articleData);
+                        console.log('Update successful:', result);
+                        navigate(`/articles/${id}`);
+                    } catch (updateErr: unknown) {
+                        console.error('Update error details:', updateErr);
+                        throw updateErr;
+                    }
+                } else {
+                    // Fall back to numeric ID if documentId not available
+                    let numericId;
+                    
+                    // First try to convert to number
+                    if (!isNaN(Number(id))) {
+                        numericId = Number(id);
+                        console.log(`Converting ID ${id} to numeric: ${numericId}`);
+                    } else {
+                        numericId = id;
+                        console.log(`Using ID as is: ${id}`);
+                    }
+                    
+                    try {
+                        const result = await ArticleService.update(String(numericId), articleData);
+                        console.log('Update successful:', result);
+                        navigate(`/articles/${numericId}`);
+                    } catch (updateErr: unknown) {
+                        console.error('Update error details:', updateErr);
+                        throw updateErr;
+                    }
+                }
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error submitting form:", err);
-            const errorMessage = err.response?.data?.error?.message || err.message || 'An error occurred';
+            const errorMessage =
+                axios.isAxiosError(err)
+                    ? err.response?.data?.error?.message || err.message
+                    : err instanceof Error ? err.message : 'An error occurred';
             setError(errorMessage);
         } finally {
             setLoading(false);

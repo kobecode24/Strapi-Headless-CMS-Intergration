@@ -30,8 +30,20 @@ const ArticleDetail: React.FC = () => {
         if (window.confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
             try {
                 setIsDeleting(true);
-                await ArticleService.delete(id);
-                navigate('/articles');
+                // Get documentId from either nested or flat structure
+                if (article) {
+                    const   documentId = article.data.attributes?.documentId || article.data.documentId;
+                    if (documentId) {
+                        await ArticleService.delete(documentId);
+                        navigate('/articles');
+                    } else {
+                        // Fallback to using ID if documentId is not available
+                        await ArticleService.delete(id);
+                        navigate('/articles');
+                    }
+                } else {
+                    throw new Error('Article data not available');
+                }
             } catch (err) {
                 console.error('Error deleting article:', err);
                 setIsDeleting(false);

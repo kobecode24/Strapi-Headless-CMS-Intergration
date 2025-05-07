@@ -5,8 +5,17 @@ import {
     Article,
     About
 } from '../types';
-import config from '../config';
 import { handleApiError } from '../utils/errorHandling';
+
+// Article update/create data type
+export interface ArticleInputData {
+    title: string;
+    description: string;
+    slug: string;
+    cover?: { id: number } | number;
+    category?: number | { id: number } | null;
+    [key: string]: any;
+}
 
 // Create axios instance with common configuration
 const apiClient = axios.create({
@@ -44,22 +53,46 @@ export const ArticleService = {
     getById: async (id: string): Promise<StrapiSingleResponse<Article>> => {
         try {
             console.log(`Fetching article with ID: ${id}`);
-            const url = `/articles/${id}?populate=*`;
+            
+            // Make sure we're using a clean ID (no trailing spaces, etc.)
+            const cleanId = id.trim();
+            const url = `/articles/${cleanId}?populate=*`;
+            
             console.log(`Request URL: ${apiClient.defaults.baseURL}${url}`);
             
-            const response = await apiClient.get<StrapiSingleResponse<Article>>(url);
+            // Add timeout and extra error handling
+            const response = await apiClient.get<StrapiSingleResponse<Article>>(url, {
+                timeout: 10000, // 10 second timeout
+            });
+            
             console.log("Article response:", response.data);
+            
+            // Validate the response data
+            if (!response.data || !response.data.data) {
+                throw new Error('Invalid response format from API');
+            }
+            
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error fetching article:", error);
-            console.error("Status:", error.response?.status);
-            console.error("Error data:", error.response?.data);
+
+            if (axios.isAxiosError(error)) {
+                console.error("Status:", error.response?.status);
+                console.error("Error data:", error.response?.data);
+
+                // Enhanced error for debugging
+                if (error.response?.status === 404) {
+                    console.error(`Article with ID ${id} not found in the database`);
+                    throw new Error(`Article with ID ${id} not found`);
+                }
+            }
+
             throw handleApiError(error);
         }
     },
 
     // Create a new article
-    create: async (articleData: any): Promise<StrapiSingleResponse<Article>> => {
+    create: async (articleData: ArticleInputData): Promise<StrapiSingleResponse<Article>> => {
         try {
             console.log("Creating article with data:", articleData);
             const response = await apiClient.post<StrapiSingleResponse<Article>>(
@@ -74,23 +107,47 @@ export const ArticleService = {
     },
 
     // Update an article
-    update: async (id: string, articleData: Partial<Article>): Promise<StrapiSingleResponse<Article>> => {
+    update: async (id: string, articleData: ArticleInputData): Promise<StrapiSingleResponse<Article>> => {
         try {
+            console.log("API Service: Updating article with ID:", id);
+            console.log("API Service: Update data:", JSON.stringify(articleData, null, 2));
+            
+            // Check if the ID looks like a documentId (contains letters)
+            const isDocumentId = /[a-zA-Z]/.test(id);
+            
+            let endpoint;
+            if (isDocumentId) {
+                console.log("API Service: Using documentId endpoint for update");
+                endpoint = `/articles/document/${id}`;
+            } else {
+                console.log("API Service: Using numeric ID endpoint for update");
+                endpoint = `/articles/${id}`;
+            }
+            
+            // For updates, the API expects a simpler format
             const response = await apiClient.put<StrapiSingleResponse<Article>>(
-                `/articles/${id}`,
+                endpoint,
                 { data: articleData }
             );
+            
+            console.log("API Service: Update response:", response.status, response.statusText);
             return response.data;
-        } catch (error) {
-            console.error("Error updating article:", error);
+        } catch (error: unknown) {
+            console.error("API Service: Error updating article:", error);
+
+            if (axios.isAxiosError(error)) {
+                console.error("API Service: Error status:", error.response?.status);
+                console.error("API Service: Error data:", JSON.stringify(error.response?.data, null, 2));
+            }
+
             throw handleApiError(error);
         }
     },
 
     // Delete an article
-    delete: async (id: string): Promise<void> => {
+    delete: async (documentId: string): Promise<void> => {
         try {
-            await apiClient.delete(`/articles/${id}`);
+            await apiClient.delete(`/articles/${documentId}`);
         } catch (error) {
             console.error("Error deleting article:", error);
             throw handleApiError(error);
@@ -128,9 +185,11 @@ export const ArticleService = {
             );
             
             return articleResponse.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error creating article with files:", error);
-            console.error("Error response:", error.response?.data);
+            if (axios.isAxiosError(error)) {
+                console.error("Error response:", error.response?.data);
+            }
             throw handleApiError(error);
         }
     },
@@ -163,10 +222,12 @@ export const ArticleService = {
             const response = await apiClient.get<StrapiCollectionResponse<Article>>(url);
             console.log("Related articles response:", response.data);
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error fetching related articles:", error);
-            console.error("Status:", error.response?.status);
-            console.error("Error data:", error.response?.data);
+            if (axios.isAxiosError(error)) {
+                console.error("Status:", error.response?.status);
+                console.error("Error data:", error.response?.data);
+            }
             throw handleApiError(error);
         }
     },

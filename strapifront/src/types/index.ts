@@ -36,7 +36,7 @@ export interface StrapiImage {
     url: string;
     previewUrl: null | string;
     provider: string;
-    provider_metadata: null | any;
+    provider_metadata: null | Record<string, unknown>;
     createdAt: string;
     updatedAt: string;
     publishedAt: string;
@@ -79,19 +79,22 @@ export interface Article {
     documentId: string;
     title: string;
     description: string;
+    content?: string;
     slug: string;
+    featured: boolean | null;
     createdAt: string;
     updatedAt: string;
     publishedAt: string;
-    cover: StrapiImage;
-    author: Author;
-    category: Category;
-    blocks?: ContentBlock[];
+    cover: StrapiImage | null;
+    blocks: ContentBlock[];
+    category?: Category;
+    author?: Author;
 }
 
 // Strapi data structure
 export interface StrapiData<T> {
     id: number;
+    documentId?: string;
     attributes: T;
 }
 
@@ -111,7 +114,7 @@ export interface StrapiCollectionResponse<T> {
 // Strapi response for single items
 export interface StrapiSingleResponse<T> {
     data: StrapiData<T>;
-    meta: {}
+    meta: object
 }
 
 // Add this interface

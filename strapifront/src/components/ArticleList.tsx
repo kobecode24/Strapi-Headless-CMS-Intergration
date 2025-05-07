@@ -4,7 +4,16 @@ import { useArticles } from '../hooks/useArticles';
 import { ArticleService } from '../services/api';
 
 // Helper function to get image URL
-const getImageUrl = (cover: any) => {
+interface Cover {
+  formats?: {
+    medium?: { url: string };
+    small?: { url: string };
+  };
+  url?: string;
+  alternativeText?: string;
+}
+
+const getImageUrl = (cover: Cover | null | undefined) => {
   if (!cover) return 'https://placehold.co/600x400?text=No+Image';
   
   const baseUrl = 'http://localhost:1337';
@@ -17,15 +26,28 @@ const getImageUrl = (cover: any) => {
 
 const ArticleList: React.FC = () => {
     const { articles, loading, error, refetch } = useArticles();
-    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (documentId: string) => {
         if (window.confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
             try {
-                setDeletingId(id);
-                await ArticleService.delete(id.toString());
-                // Refresh the list after delete
-                refetch();
+                setDeletingId(documentId);
+                await ArticleService.delete(documentId);
+                // Force immediate refetch after successful deletion
+                await refetch();
+                // Also, force-update the article state by filtering out the deleted item
+                if (articles && articles.data) {
+                    const updatedArticles = {
+                        ...articles,
+                        data: articles.data.filter(article => {
+                            // Handle both flat and nested structure
+                            const articleDocId = article.attributes?.documentId || article.documentId;
+                            return articleDocId !== documentId;
+                        })
+                    };
+                    // This will update the UI immediately without waiting for refetch
+                    articles.data = updatedArticles.data;
+                }
             } catch (err) {
                 console.error('Error deleting article:', err);
                 alert('Failed to delete article. Please try again.');
@@ -59,6 +81,8 @@ const ArticleList: React.FC = () => {
                     {articles.data.map((article) => {
                         // Handle both possible data structures
                         const articleData = article.attributes || article;
+                        // Get documentId from either nested or flat structure
+                        const documentId = article.attributes?.documentId || article.documentId;
                         
                         return (
                             <div key={article.id} className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg hover:-translate-y-1 transition-all">
@@ -83,7 +107,10 @@ const ArticleList: React.FC = () => {
 
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <Link to={`/articles/${article.id}`} className="text-primary font-medium hover:underline">
+                                            <Link 
+                                                to={`/articles/${article.id}`} 
+                                                className="text-primary font-medium hover:underline"
+                                            >
                                                 Read More
                                             </Link>
                                         </div>
@@ -95,11 +122,11 @@ const ArticleList: React.FC = () => {
                                                 Edit
                                             </Link>
                                             <button
-                                                onClick={() => handleDelete(article.id)}
-                                                disabled={deletingId === article.id}
+                                                onClick={() => documentId && handleDelete(documentId)}
+                                                disabled={deletingId === documentId}
                                                 className="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-red-300"
                                             >
-                                                {deletingId === article.id ? 'Deleting...' : 'Delete'}
+                                                {deletingId === documentId ? 'Deleting...' : 'Delete'}
                                             </button>
                                             {articleData.category && (
                                                 <span className="inline-block bg-gray-100 px-3 py-1 rounded-md text-sm">
