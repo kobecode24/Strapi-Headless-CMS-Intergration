@@ -192,7 +192,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ mode }) => {
                         throw updateErr;
                     }
                 } else {
-                    // Fall back to numeric ID if documentId not available
+                    // Fall back to numeric ID if the documentId not available
                     let numericId;
                     
                     // First try to convert to number
