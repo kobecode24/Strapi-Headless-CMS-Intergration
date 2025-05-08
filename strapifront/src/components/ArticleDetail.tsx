@@ -10,6 +10,26 @@ interface RouteParams {
     [key: string]: string;
 }
 
+// Define types for image data
+interface ImageFormat {
+    url: string;
+    hash?: string;
+    mime?: string;
+    width?: number;
+    height?: number;
+}
+
+interface CoverImage {
+    url?: string;
+    alternativeText?: string;
+    formats?: {
+        large?: ImageFormat;
+        medium?: ImageFormat;
+        small?: ImageFormat;
+        thumbnail?: ImageFormat;
+    };
+}
+
 const ArticleDetail: React.FC = () => {
     const { id } = useParams<RouteParams>() as RouteParams;
     const { article, loading, error } = useArticle(id);
@@ -82,13 +102,28 @@ const ArticleDetail: React.FC = () => {
         day: 'numeric',
     });
 
+    // Helper function to get the best available image URL
+    const getImageUrl = (cover: CoverImage | null | undefined): string | undefined => {
+        if (!cover || !cover.url) return undefined;
+        
+        const baseUrl = 'http://localhost:1337';
+        // Try to get the best format available in order of preference
+        const formatUrl = cover.formats?.large?.url || 
+                          cover.formats?.medium?.url || 
+                          cover.formats?.small?.url || 
+                          cover.formats?.thumbnail?.url;
+                          
+        // Fall back to the main URL if no formats are available
+        return `${baseUrl}${formatUrl || cover.url}`;
+    };
+
     return (
         <div className="max-w-3xl mx-auto bg-white rounded-lg p-8 shadow-md">
             <Link to="/articles" className="inline-block mb-6 text-primary font-medium transition-transform hover:-translate-x-1">
                 &larr; Back to Articles
             </Link>
 
-            <div className="flex gap-3 mb-6">
+            <div className="flex gap-3 mb-12">
                 <Link to={`/articles/edit/${id}`} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
                     Edit
                 </Link>
@@ -102,12 +137,15 @@ const ArticleDetail: React.FC = () => {
             </div>
 
             {/* Cover image */}
-            {cover && (
+            {cover && getImageUrl(cover) && (
                 <div className="mb-6 -mx-8 -mt-8 rounded-t-lg overflow-hidden">
                     <img
-                        src={`http://localhost:1337${cover.formats.large?.url || cover.formats.medium.url}`}
+                        src={getImageUrl(cover)}
                         alt={cover.alternativeText || title}
                         className="w-full h-auto"
+                        onError={(e) => {
+                            e.currentTarget.src = 'https://placehold.co/600x400?text=Image+Error';
+                        }}
                     />
                 </div>
             )}
