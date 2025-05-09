@@ -1,0 +1,62 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: toor
+      POSTGRES_DB: g9demo
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Strapi Backend
+  strapi:
+    build:
+      context: ./my-project
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: g9demo
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: toor
+      DATABASE_SSL: "false"
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 1337
+    volumes:
+      - ./my-project/src:/app/src
+      - ./my-project/config:/app/config
+      - ./my-project/public:/app/public
+    ports:
+      - "1337:1337"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./strapifront
+      dockerfile: Dockerfile
+    environment:
+      - VITE_API_URL=http://localhost:1337/api
+    volumes:
+      - ./strapifront/src:/app/src
+    ports:
+      - "3000:3000"
+    depends_on:
+      - strapi
+    restart: unless-stopped
+
+volumes:
+  postgres-data: 

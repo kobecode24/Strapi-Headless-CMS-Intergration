@@ -28,29 +28,92 @@ A full-stack application for managing articles, built with Strapi (headless CMS)
 
 ## Project Structure
 
+- `my-project/` - Strapi backend
+- `strapifront/` - React frontend
+- `docker-compose.yml` - Docker Compose configuration
+
+## Getting Started with Docker
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Running the Project
+
+1. Clone this repository:
+   ```bash
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
+
+2. Start the application stack:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. Access the applications:
+   - Strapi Admin: http://localhost:1337/admin
+   - React Frontend: http://localhost:3000
+
+### Development Workflow
+
+The Docker setup is configured for development with hot-reloading:
+
+- Changes to Strapi backend files in `my-project/src` will automatically reload the backend
+- Changes to React frontend files in `strapifront/src` will automatically reload the frontend
+
+### Stopping the Project
+
+```bash
+docker-compose down
 ```
-G9demo/
-├── my-project/              # Strapi backend
-│   ├── config/              # Strapi configuration
-│   ├── src/
-│   │   ├── api/             # API definitions and controllers
-│   │   │   ├── article/     # Article API components
-│   │   │   ├── category/    # Category API components
-│   │   │   └── ...
-│   │   ├── extensions/      # Strapi extensions
-│   │   └── ...
-│   └── ...
-│
-└── strapifront/            # React frontend
-    ├── src/
-    │   ├── components/      # React components
-    │   ├── services/        # API services
-    │   ├── hooks/           # Custom React hooks
-    │   ├── utils/           # Utility functions
-    │   ├── types/           # TypeScript type definitions
-    │   └── ...
-    └── ...
+
+To remove the volumes (database data) as well:
+```bash
+docker-compose down -v
 ```
+
+## First-time Setup
+
+When running the Strapi backend for the first time:
+
+1. Access http://localhost:1337/admin
+2. Create an admin user
+3. Create content types and add content
+
+## Environment Variables
+
+### Strapi Backend
+
+Environment variables for the Strapi backend are configured in the `docker-compose.yml` file.
+
+### React Frontend
+
+The frontend connects to the Strapi API using the `VITE_API_URL` environment variable.
+
+## Services
+
+- **postgres**: PostgreSQL database
+- **strapi**: Strapi backend
+- **frontend**: React frontend
+
+## Data Persistence
+
+Database data is persisted in a Docker volume named `postgres-data`.
+
+## Production Deployment
+
+For production deployment, modify the Dockerfiles and docker-compose.yml:
+
+1. In the Strapi Dockerfile, change `CMD ["npm", "run", "develop"]` to `CMD ["npm", "start"]`
+2. In the React frontend Dockerfile, add a production build stage with Nginx
+
+## Troubleshooting
+
+- **Database Connection Issues**: Make sure the database container is running and healthy
+- **API Connection Issues**: Check that the `VITE_API_URL` environment variable is set correctly
+- **Container Logs**: Run `docker-compose logs -f [service-name]` to view container logs
 
 ## Installation
 
